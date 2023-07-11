@@ -54,11 +54,8 @@ def _tokenize_formatted_example(example: Dict[str, Any], tokenizer: Tokenizer):
             f'from {example=}.'
         )
     if (example['prompt'] is None) or (example['response'] is None) or example['prompt'] == '' or example['response'] == '':
-        raise KeyError(
-            'Unable to tokenize example because it has not been properly formatted. ' +\
-            '"prompt" and "response" are required keys but at least one was empty or None ' +\
-            f'from {example=}.'
-        )
+        example['prompt'] = ' '
+        example['response'] = ' '
     return tokenizer(text=example['prompt'], text_target=example['response'])
 
 
