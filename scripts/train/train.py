@@ -213,6 +213,7 @@ def main(cfg):
             print_trainable_parameters(model)  # should not be 100%
         else:  # standard model
             model = build_composer_model(cfg.model, tokenizer)
+            model.tokenizer = None # EDITED
     cfg.n_params = sum(p.numel() for p in model.parameters())
     print(f'{cfg.n_params=:.2e}')
 

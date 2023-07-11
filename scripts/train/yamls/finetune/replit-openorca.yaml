@@ -1,0 +1,119 @@
+max_seq_len: 2048
+global_seed: 17
+
+# Run Name
+run_name: openorca # If left blank, will be read from env var $RUN_NAME
+
+model:
+  name: hf_causal_lm
+  pretrained: true
+  pretrained_model_name_or_path: replit/replit-code-v1-3b
+  config_overrides:
+    attn_config:
+      attn_impl: triton
+      # Set this to `true` if using `train_loader.dataset.packing_ratio` below
+      attn_uses_sequence_id: false
+
+# Tokenizer
+tokenizer:
+  name: replit/replit-code-v1-3b
+  kwargs:
+    model_max_length: ${max_seq_len}
+    trust_remote_code: true
+
+# Dataloaders
+train_loader:
+  name: finetuning
+  dataset:
+    remote: s3://mcli-training-data/replit-finetune/
+    local: /test/tmp/1/
+    split: train
+    max_seq_len: ${max_seq_len}
+    allow_pad_trimming: false
+    decoder_only_format: true
+    # # Use `python llmfoundry/data/packing.py --yaml-path /path/to/this/yaml/ ...`
+    # # to profile this run's optimal packing_ratio as it depends on GPU count,
+    # # batch size, sequence length
+    # packing_ratio:
+    shuffle: true
+  drop_last: true
+  num_workers: 32
+  pin_memory: false
+  prefetch_factor: 2
+  persistent_workers: true
+  timeout: 0
+
+# icl_tasks:
+# -
+#   label: math_qa
+#   dataset_uri: ./llm-foundry/scripts/eval/local_data/symbolic_problem_solving/math_qa.jsonl
+#   num_fewshot: [0]
+#   icl_task_type: schema
+
+# Optimization
+scheduler:
+  name: linear_decay_with_warmup
+  t_warmup: 50ba
+  alpha_f: 0
+
+optimizer:
+  name: decoupled_adamw
+  lr: 5.0e-6
+  betas:
+  - 0.9
+  - 0.999
+  eps: 1.0e-8
+  weight_decay: 0
+
+algorithms:
+  gradient_clipping:
+    clipping_type: norm
+    clipping_threshold: 1.0
+
+max_duration: 2ep  # 2-3 epochs seems like the sweet spot
+eval_interval: 1
+# eval_subset_num_batches: -1
+# eval_first: true
+global_train_batch_size: 256  # somewhere in the 6-8 * numgpus range seems good
+
+# System
+seed: ${global_seed}
+device_eval_batch_size: 8
+# device_train_microbatch_size: 4
+device_train_microbatch_size: auto
+precision: amp_bf16
+
+# FSDP
+fsdp_config:
+  sharding_strategy: FULL_SHARD
+  mixed_precision: PURE
+  activation_checkpointing: true
+  activation_checkpointing_reentrant: false
+  activation_cpu_offload: false
+  limit_all_gathers: true
+  verbose: false
+
+# Logging
+progress_bar: false
+log_to_console: true
+console_log_interval: 1ba
+
+callbacks:
+  speed_monitor:
+    window_size: 10
+  lr_monitor: {}
+  memory_monitor: {}
+  runtime_estimator: {}
+
+autoresume: true
+
+loggers:
+  wandb:
+    project: replit-openorca
+
+# Checkpoint to local filesystem or remote object store
+# save_latest_filename: latest
+save_interval: 400ba
+save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
+# save_folder: ./llm/{run_name}
+save_folder: s3://mcli-training-data/replit-finetune/{run_name}/checkpoints
