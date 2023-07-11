@@ -21,15 +21,13 @@ tokenizer:
   kwargs:
     model_max_length: ${max_seq_len}
 
+
 # Dataloaders
 train_loader:
   name: finetuning
   dataset:
     hf_name: matorus/coder
-    # hf_name: json
-    # hf_kwargs:
-    #   data_dir: llm/dataset/coder/
-    preprocessing_fn: preprocess:coder_prompt
+    # preprocessing_fn: preprocess:coder_prompt
     split: train
     max_seq_len: ${max_seq_len}
     allow_pad_trimming: false
@@ -40,49 +38,11 @@ train_loader:
     # packing_ratio:
     shuffle: true
   drop_last: true
-  num_workers: 32
+  num_workers: 8
   pin_memory: false
   prefetch_factor: 2
   persistent_workers: true
   timeout: 0
-
-# Dataloaders
-# train_loader:
-#   name: finetuning
-#   dataset:
-#     hf_name: mosaicml/dolly_hhrlhf
-#     split: train
-#     max_seq_len: ${max_seq_len}
-#     allow_pad_trimming: false
-#     decoder_only_format: true
-#     # # Use `python llmfoundry/data/packing.py --yaml-path /path/to/this/yaml/ ...`
-#     # # to profile this run's optimal packing_ratio as it depends on GPU count,
-#     # # batch size, sequence length
-#     # packing_ratio:
-#     shuffle: true
-#   drop_last: true
-#   num_workers: 8
-#   pin_memory: false
-#   prefetch_factor: 2
-#   persistent_workers: true
-#   timeout: 0
-
-# eval_loader:
-#   name: finetuning
-#   dataset:
-#     hf_name: mosaicml/dolly_hhrlhf
-#     split: test
-#     max_seq_len: ${max_seq_len}
-#     allow_pad_trimming: false
-#     decoder_only_format: true
-#     # packing_ratio:
-#     shuffle: false
-#   drop_last: true
-#   num_workers: 8
-#   pin_memory: false
-#   prefetch_factor: 2
-#   persistent_workers: true
-#   timeout: 0
 
 # Optimization
 scheduler:
@@ -109,7 +69,7 @@ max_duration: 2ep  # 2-3 epochs seems like the sweet spot
 eval_interval: 1ep
 # eval_subset_num_batches: -1
 eval_first: true
-global_train_batch_size: 64  # somewhere in the 6-8 * numgpus range seems good
+global_train_batch_size: 48  # somewhere in the 6-8 * numgpus range seems good
 
 # System
 seed: ${global_seed}
