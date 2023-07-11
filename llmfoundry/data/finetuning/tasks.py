@@ -54,6 +54,7 @@ def _tokenize_formatted_example(example: Dict[str, Any], tokenizer: Tokenizer):
             f'from {example=}.'
         )
     if (example['prompt'] is None) or (example['response'] is None) or example['prompt'] == '' or example['response'] == '':
+        print('Warning: prompt or response is empty.')
         example['prompt'] = ' '
         example['response'] = ' '
     return tokenizer(text=example['prompt'], text_target=example['response'])
