@@ -65,7 +65,7 @@ algorithms:
     clipping_type: norm
     clipping_threshold: 1.0
 
-max_duration: 8ep  # 2-3 epochs seems like the sweet spot
+max_duration: 3ep  # 2-3 epochs seems like the sweet spot
 eval_interval: 1
 # eval_subset_num_batches: -1
 # eval_first: true
