@@ -7,7 +7,7 @@ run_name: # If left blank, will be read from env var $RUN_NAME
 model:
   name: hf_causal_lm
   pretrained: true
-  pretrained_model_name_or_path: mosaicml/mpt-7b
+  pretrained_model_name_or_path: mosaicml/mpt-30b
   config_overrides:
     max_seq_len: ${max_seq_len}
     attn_config:
@@ -17,7 +17,7 @@ model:
 
 # Tokenizer
 tokenizer:
-  name: mosaicml/mpt-7b
+  name: mosaicml/mpt-30b
   kwargs:
     model_max_length: ${max_seq_len}
 
@@ -102,7 +102,7 @@ callbacks:
 
 loggers:
   wandb:
-    project: mpt-7b-coder
+    project: mpt-30b-coder
 
 # Checkpoint to local filesystem or remote object store
 # save_interval: 5000ba
@@ -113,4 +113,4 @@ loggers:
 save_interval: 400ba
 save_num_checkpoints_to_keep: 1  # Important, this cleans up checkpoints saved to DISK
 # save_folder: ./llm/{run_name}
-save_folder: s3://mcli-training-data/mpt-7b-coder/{run_name}/checkpoints
+save_folder: s3://mcli-training-data/mpt-30b-coder/{run_name}/checkpoints
